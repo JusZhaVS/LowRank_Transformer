@@ -11,3 +11,6 @@ class TransformerConfig:
     intermediate_size: int = 3072
     max_position_embeddings: int = 1024
     use_causal_mask: bool = True
+
+    # Rank Size
+    rank: int = 32
