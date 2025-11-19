@@ -8,7 +8,7 @@ from .LowRankMultiHeadAttention import LowRankMultiHeadAttention
 
 class TransformerBlock(nn.Module):
 
-    def __init__(self, hidden_size: int, num_heads: int, intermediate_size: int):
+    def __init__(self, hidden_size: int, num_heads: int, intermediate_size: int, rank:int=32):
         """
         Complete transformer block with attention and feed-forward
 
@@ -22,7 +22,7 @@ class TransformerBlock(nn.Module):
         self.rms_norm1 = RMSNorm(hidden_size=hidden_size)
         self.rms_norm2 = RMSNorm(hidden_size=hidden_size)
 
-        self.multi_head_attn = LowRankMultiHeadAttention(hidden_size=hidden_size, num_heads=num_heads)
+        self.multi_head_attn = LowRankMultiHeadAttention(hidden_size=hidden_size, num_heads=num_heads, rank=rank)
         self.ffn = FeedForward(hidden_size=hidden_size, intermediate_size=intermediate_size)
 
     def forward(self, hidden_states: torch.Tensor, attention_mask: Optional[torch.Tensor] = None) -> torch.Tensor:

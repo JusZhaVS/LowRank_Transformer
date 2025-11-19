@@ -24,7 +24,8 @@ class TransformerModel(nn.Module):
           transformer_block = TransformerBlock(
               hidden_size=config.hidden_size,
               num_heads=config.num_attention_heads,
-              intermediate_size=config.intermediate_size
+              intermediate_size=config.intermediate_size,
+              rank=config.rank
           )
 
           self.layers.append(transformer_block)

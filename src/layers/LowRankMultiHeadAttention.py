@@ -11,7 +11,7 @@ Contains the class implementation of Low Rank Multi-Headed Attention
 
 class LowAttentionHead(nn.Module):
 
-    def __init__(self, hidden_size: int, head_dim: int,  rank:int=256):
+    def __init__(self, hidden_size: int, head_dim: int,  rank:int=32):
         """
         Single attention head implementation
 
@@ -62,14 +62,14 @@ class LowAttentionHead(nn.Module):
 
 class LowRankMultiHeadAttention(nn.Module):
 
-    def __init__(self, hidden_size: int, num_heads: int, rank=256):
+    def __init__(self, hidden_size: int, num_heads: int, rank=32):
         """
         Multi-head attention implementation
 
         Args:
             hidden_size: Model dimension
             num_heads: Number of attention heads
-            rank: Rank Decomposition of A and B -> Default set to 256
+            rank: Rank Decomposition of A and B -> Default set to 32
         """
 
         super().__init__()

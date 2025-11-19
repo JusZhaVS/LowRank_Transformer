@@ -12,6 +12,9 @@ class TrainingConfig:
     max_position_embeddings: int = 1024
     use_causal_mask: bool = True
 
+    # Rank Size
+    rank: int = 32
+
     # Training hyperparameters
     batch_size: int = 16
     learning_rate: float = 5e-4
