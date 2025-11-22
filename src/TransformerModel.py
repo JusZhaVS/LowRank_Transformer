@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from typing import Optional
+from typing import Optional, Tuple
 from .config.TransformerConfig import TransformerConfig
 from .layers.RMSNorm import RMSNorm
 from .layers.TransformerBlock import TransformerBlock
@@ -9,6 +9,7 @@ from .utils.create_causal_mask import create_causal_mask
 
 
 class TransformerModel(nn.Module):
+
     def __init__(self, config: TransformerConfig):
         """
         Complete transformer model for causal language modeling
@@ -32,7 +33,7 @@ class TransformerModel(nn.Module):
 
         self.norm = RMSNorm(config.hidden_size)
 
-    def forward(self, input_ids: torch.Tensor, attention_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+    def forward(self, input_ids: torch.Tensor, attention_mask: Optional[torch.Tensor] = None)-> Tuple[torch.Tensor, torch.Tensor]:
         """
         Forward pass for transformer model
 
@@ -44,7 +45,7 @@ class TransformerModel(nn.Module):
             hidden_states: Final hidden states (batch_size, seq_len, hidden_size)
         """
 
-        batch_size, seq_len = input_ids.shape
+        _, seq_len = input_ids.shape
         device = input_ids.device
 
         positions = torch.arange(seq_len, device=device).unsqueeze(0)
@@ -54,7 +55,7 @@ class TransformerModel(nn.Module):
           attention_mask = create_causal_mask(seq_len, device=device)
 
         for trans_block in self.layers:
-          hidden_states = trans_block(hidden_states=hidden_states, attention_mask=attention_mask)
+          hidden_states, _ = trans_block(hidden_states=hidden_states, attention_mask=attention_mask)
 
         hidden_states = self.norm(hidden_states)
 

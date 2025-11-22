@@ -35,6 +35,7 @@ class TransformerBlock(nn.Module):
 
         Returns:
             hidden_states: Output tensor (batch_size, seq_len, hidden_size)
+            attn_out: Attention matrix tensor
         """
 
         norm_1 = self.rms_norm1(hidden_states=hidden_states)
@@ -45,4 +46,4 @@ class TransformerBlock(nn.Module):
         ffn_output = self.ffn(norm_2)
         hidden_states = hidden_states + ffn_output
 
-        return hidden_states
+        return hidden_states, attn_out
