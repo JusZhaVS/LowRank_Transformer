@@ -1,8 +1,8 @@
 import datasets
 
 from transformers import AutoTokenizer
-from training_utils import count_parameters
-from Trainer import Trainer
+from Trainers.training_utils import count_parameters
+from Trainers.Trainer import Trainer
 
 from src.CausalLanguageModel import CausalLanguageModel
 from src.config.TrainingConfig import TrainingConfig
@@ -26,14 +26,7 @@ def main():
     training_config = TrainingConfig(vocab_size=tokenizer.vocab_size)
 
     # Create model config and initialize model
-    model_config = TransformerConfig(
-        vocab_size=training_config.vocab_size,
-        hidden_size=training_config.hidden_size,
-        num_attention_heads=training_config.num_attention_heads,
-        num_hidden_layers=training_config.num_hidden_layers,
-        intermediate_size=training_config.intermediate_size,
-        max_position_embeddings=training_config.max_position_embeddings
-    )
+    model_config = TransformerConfig(rank=32)
 
     # Initialize model
     model = CausalLanguageModel(model_config)
@@ -41,7 +34,7 @@ def main():
 
     # Initialize trainer
     trainer = Trainer(model, train_dataset, tokenizer, training_config)
-    trainer.train()
+    model = trainer.train()
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 class TinyStoriesDataset:
+
     def __init__(self, dataset, tokenizer, max_length=512, max_samples=None):
         self.dataset = dataset
         self.tokenizer = tokenizer

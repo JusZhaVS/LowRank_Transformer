@@ -86,7 +86,7 @@ class Trainer:
             return loss.item()
 
 
-    def train(self):
+    def train(self) -> nn.Module:
         """Main training loop"""
         print(f"Starting training for {self.config.num_epochs} epochs")
         print(f"Total steps: {self.total_steps}")
@@ -154,3 +154,5 @@ class Trainer:
             print(f"Epoch {epoch + 1} completed. Average loss: {avg_epoch_loss:.4f}")
         save_model(self.model, self.tokenizer, self.config.output_dir)
         print("Training completed!")
+
+        return self.model
