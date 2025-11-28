@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Research Blog Title – Your Name</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Short 1–2 sentence description of this post." />
+
+  <!-- Optional: MathJax for LaTeX-style math -->
+  <!--
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  -->
+
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --bg-card: #ffffff;
+      --border-subtle: #e0e4ef;
+      --accent: #2563eb;
+      --accent-soft: #e0ecff;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --code-bg: #f3f4f6;
+      --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --radius-lg: 12px;
+      --shadow-soft: 0 14px 25px rgba(15, 23, 42, 0.08);
+      --max-width: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-body);
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Layout */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .site-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .site-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .header-right {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    main {
+      flex: 1;
+      max-width: var(--max-width);
+      margin: 24px auto;
+      padding: 0 16px 48px;
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(200px, 1.1fr);
+      gap: 24px;
+    }
+
+    /* Article / content card */
+    .article-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 24px 24px 32px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .article-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    h1.article-title {
+      font-size: 28px;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .article-authors {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .article-authors a {
+      font-weight: 500;
+    }
+
+    .article-tags {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .tag-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 11px;
+      margin-right: 6px;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border-subtle);
+      margin: 24px 0;
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 32px;
+    }
+
+    section h2 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--accent);
+      padding-left: 8px;
+    }
+
+    section h3 {
+      font-size: 16px;
+      margin-top: 18px;
+      margin-bottom: 6px;
+    }
+
+    p {
+      margin: 8px 0;
+    }
+
+    .abstract {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 12px 14px;
+      border: 1px solid var(--border-subtle);
+      font-size: 14px;
+    }
+
+    .callout {
+      border-radius: 8px;
+      border: 1px solid var(--accent-soft);
+      background: #f9fbff;
+      padding: 12px 14px;
+      font-size: 14px;
+    }
+
+    .callout strong {
+      color: var(--accent);
+    }
+
+    /* Figures */
+    figure {
+      margin: 20px 0;
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    figcaption {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    /* Code / pre */
+    pre {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 10px 12px;
+      overflow: auto;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      border: 1px solid var(--border-subtle);
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background: var(--code-bg);
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent-soft);
+      margin: 12px 0;
+      padding-left: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-style: italic;
+    }
+
+    /* TOC / sidebar */
+    aside {
+      position: relative;
+    }
+
+    .toc {
+      position: sticky;
+      top: 84px;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 16px 18px;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      font-size: 13px;
+    }
+
+    .toc-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .toc small {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .toc ul {
+      list-style: none;
+      margin: 8px 0 0;
+      padding: 0;
+    }
+
+    .toc li {
+      margin: 3px 0;
+    }
+
+    .toc a {
+      display: inline-block;
+      padding: 2px 0;
+    }
+
+    .toc .toc-sub {
+      padding-left: 12px;
+      font-size: 12px;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 12px 16px 16px;
+      text-align: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      aside {
+        order: -1;
+      }
+
+      .toc {
+        position: static;
+        max-height: none;
+        margin-bottom: 12px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .article-card {
+        padding: 18px 16px 24px;
+      }
+
+      h1.article-title {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <main>
+    <!-- Main article -->
+    <article class="article-card">
+      <div class="article-meta">Final · Last updated: 2025-11-27</div>
+      <h1 class="article-title">Factored Attention Projections (FAP) for Parameter-Efficient Transformers</h1>
+
+      <div class="article-authors">
+        <a href="https://github.com/HatedFate">Xin Qi Liu</a>,
+        <a href="https://pornhub.com">Justin Zhang</a>,
+        <a href="https://pornhub.com">Nico</a>
+      </div>
+      <hr />
+
+      <!-- Abstract -->
+      <section id="abstract">
+        <h2>Abstract</h2>
+        <div class="abstract">
+          <p>
+            ...
+          </p>
+        </div>
+      </section>
+
+      <!-- Introduction -->
+      <section id="introduction">
+        <h2>1. Introduction</h2>
+
+        <p>
+          Use the introduction to motivate the problem. What phenomenon are you trying to understand or
+          explain? Why does it matter in practice or in theory? Describe the gap in existing work in 1–3
+          short paragraphs.
+        </p>
+
+        <p>
+          Example: Deep learning systems achieve striking performance on a wide range of tasks, yet
+          our theoretical understanding of why they work so well remains incomplete. Existing analyses
+          often focus on simplified models, narrow regimes, or isolated phenomena (e.g., optimization,
+          generalization, scaling laws), but we lack a unifying picture.
+        </p>
+
+        <p>
+          Then outline the structure of the post in a few sentences:
+          “In this post, we (1) introduce X, (2) connect it to Y and Z, and (3) illustrate its implications
+          for practice through a small experiment.”
+        </p>
+      </section>
+
+      <!-- Background -->
+      <section id="background">
+        <h2>2. Background and Related Work</h2>
+
+        <h3 id="background-concepts">2.1 Key concepts</h3>
+        <p>
+          Briefly define the main objects you will talk about (e.g., representations, loss landscapes,
+          scaling laws). Keep each definition in its own short paragraph, and link out to standard
+          references when appropriate.
+        </p>
+
+        <h3 id="related-work">2.2 Related work</h3>
+        <p>
+          Summarize prior work at a high level. Group papers by idea (“Neural tangent kernel analyses”,
+          “Scaling law characterizations”, “Mechanistic interpretability”) rather than listing them one by one.
+        </p>
+
+        <p>
+          Example structure:
+          “A line of work studies X [1,2]. Another line of work analyzes Y [3,4]. Our perspective differs
+          from both in that we focus on Z, which lets us unify A and B under a single framework.”
+        </p>
+      </section>
+
+      <!-- Methods / Main Idea -->
+      <section id="methods">
+        <h2>3. Main Idea / Framework</h2>
+
+        <h3 id="setup">3.1 Setup</h3>
+        <p>
+          Describe the objects and notation you will use. Keep it concrete:
+          “We consider a model $f_\\theta: \\mathbb{R}^d \\to \\mathbb{R}^k$ trained on data
+          $(x_i, y_i)$ with loss $L(\\theta)$…” (this will render if MathJax is enabled).
+        </p>
+
+        <div class="callout">
+          <strong>Tip for yourself:</strong> keep notation lightweight; blog readers tolerate less notation
+          than formal papers.
+        </div>
+
+        <h3 id="core-idea">3.2 Core idea</h3>
+        <p>
+          Explain the central claim or construction in plain language first. Imagine explaining it to a
+          smart colleague from an adjacent field. Only after that, add formulas or diagrams.
+        </p>
+
+        <p>
+          Example (with math if MathJax is on):
+          “We propose to view the training dynamics as gradient flow on a low-dimensional manifold
+          of effective representations, rather than in the full parameter space:
+          $\\dot{z}_t = -\\nabla_z \\mathcal{L}(z_t)$, where $z_t$ is the representation state.”
+        </p>
+
+        <h3 id="theory">3.3 Theoretical observations (optional)</h3>
+        <p>
+          Use this subsection for the more formal claims, lemmas, or intuitions. You can mix light
+          formalism with explanations:
+        </p>
+
+        <blockquote>
+          Under simplifying assumptions (e.g., linearized dynamics, isotropic noise), the representation
+          trajectories follow approximately straight lines in the space of sufficient statistics.
+        </blockquote>
+
+        <pre>
+// Small code example (optional)
+def toy_update(z, grad, lr=0.1):
+    # Simple representation update step
+    return z - lr * grad
+        </pre>
+      </section>
+
+      <!-- Experiments -->
+      <section id="experiments">
+        <h2>4. Experiments</h2>
+
+        <h3 id="experimental-setup">4.1 Experimental setup</h3>
+        <p>
+          Describe the dataset, models, and training setup. Keep it short and link to a repo if you have one.
+        </p>
+
+        <ul>
+          <li><strong>Datasets:</strong> e.g., CIFAR-10, synthetic Gaussian mixtures, toy regression.</li>
+          <li><strong>Models:</strong> e.g., 3-layer MLP, small transformer, CNN baseline.</li>
+          <li><strong>Training:</strong> optimizer, learning rate, number of steps, key hyperparameters.</li>
+        </ul>
+
+        <h3 id="results">4.2 Results</h3>
+
+        <figure>
+          <img src="images/example-plot.png" alt="Placeholder plot for experimental results" />
+          <figcaption>
+            Figure 1: Placeholder description of your main quantitative result. Replace with your own plot.
+          </figcaption>
+        </figure>
+
+        <p>
+          Interpret the figure in words. What’s the pattern? Which comparisons matter? What should
+          the reader take away that they wouldn’t get from just glancing at the plot?
+        </p>
+
+        <h3 id="qualitative">4.3 Qualitative examples (optional)</h3>
+        <p>
+          If relevant, show a few qualitative examples (e.g., model behaviors, attention patterns,
+          visualization of representations). Explain why each example is interesting, not just that it exists.
+        </p>
+      </section>
+
+      <!-- Discussion -->
+      <section id="discussion">
+        <h2>5. Discussion</h2>
+
+        <h3 id="implications">5.1 Implications</h3>
+        <p>
+          Summarize what your perspective or results imply for practice or theory. Think:
+          “If this view is right, how should we train, evaluate, or think about models differently?”
+        </p>
+
+        <h3 id="limitations">5.2 Limitations</h3>
+        <p>
+          Be explicit about scope. Where does your story clearly not apply? Which assumptions are
+          unrealistic? What would make you update or abandon this perspective?
+        </p>
+
+        <h3 id="future-work">5.3 Open questions / future work</h3>
+        <p>
+          End with 2–4 concrete directions a reader could explore:
+        </p>
+        <ul>
+          <li>Extend the framework to larger or more realistic models.</li>
+          <li>Test specific predictions on new benchmarks.</li>
+          <li>Connect this view to other theories (e.g., NTK, grokking, scaling laws).</li>
+        </ul>
+      </section>
+
+      <!-- Conclusion -->
+      <section id="conclusion">
+        <h2>6. Conclusion</h2>
+        <p>
+          Write a short, non-technical recap in 2–3 paragraphs. Reiterate the main question, your key
+          ideas, and your most important takeaway. Assume the reader skimmed everything else.
+        </p>
+      </section>
+
+      <!-- References -->
+      <section id="references">
+        <h2>References</h2>
+        <p style="font-size: 14px; color: var(--text-muted);">
+          Use whatever citation style you like; for a blog, hyperlinks are usually enough.
+        </p>
+        <ul>
+          <li>[1] Author et al. <em>Title of a related paper</em>, Conference, Year. <a href="#">link</a></li>
+          <li>[2] Another Author. <em>Another reference</em>. <a href="#">link</a></li>
+          <li>[3] Blog post: <em>Good prior writeup on a similar topic</em>. <a href="#">link</a></li>
+        </ul>
+      </section>
+    </article>
+
+    <!-- Sidebar / TOC -->
+    <aside>
+      <nav class="toc">
+        <div class="toc-title">On this page</div>
+        <small>Jump to any section</small>
+        <ul>
+          <li><a href="#abstract">Abstract</a></li>
+          <li><a href="#introduction">1. Introduction</a></li>
+          <li><a href="#background">2. Background &amp; Related Work</a>
+            <ul class="toc-sub">
+              <li><a href="#background-concepts">2.1 Concepts</a></li>
+              <li><a href="#related-work">2.2 Related work</a></li>
+            </ul>
+          </li>
+          <li><a href="#methods">3. Main Idea / Framework</a>
+            <ul class="toc-sub">
+              <li><a href="#setup">3.1 Setup</a></li>
+              <li><a href="#core-idea">3.2 Core idea</a></li>
+              <li><a href="#theory">3.3 Theory</a></li>
+            </ul>
+          </li>
+          <li><a href="#experiments">4. Experiments</a>
+            <ul class="toc-sub">
+              <li><a href="#experimental-setup">4.1 Setup</a></li>
+              <li><a href="#results">4.2 Results</a></li>
+              <li><a href="#qualitative">4.3 Qualitative</a></li>
+            </ul>
+          </li>
+          <li><a href="#discussion">5. Discussion</a></li>
+          <li><a href="#conclusion">6. Conclusion</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </nav>
+    </aside>
+  </main>
+
+  <footer>
+    © 2025 Your Name · Built as a simple static HTML template.
+  </footer>
+</div>
+</body>
+</html>
