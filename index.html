@@ -355,7 +355,17 @@
         <h2>Abstract</h2>
         <div class="abstract">
           <p>
-            ...
+            Transformer architectures are the backbone of modern Large Language Models (LLMs) and are
+            increasingly used across vision, audio, and multimodal tasks, but their large parameter counts
+            make deployment on consumer hardware challenging. Existing compression techniques such as quantization
+            effectively reduce memory footprint by lowering weight precision, yet they do not reduce the number
+            of parameters or structurally compress the attention mechanism itself. We introduce <b>Factored Attention
+            Projections (FAP)</b>, a method that replaces the standard full-rank query, key, and value projection
+            matrices with low-rank factorizations, thereby reducing the parameter count of the attention blocks while
+            leaving the softmax attention operation unchanged. FAP is complementary to quantization, as it targets
+            model structure rather than numerical precision. In our experiments, FAP achieves performance comparable
+            to models with full-rank attention projections while using fewer attention parameters, suggesting that
+            these projections are amenable to low-rank parameterization without substantial loss in quality.
           </p>
         </div>
       </section>
@@ -365,23 +375,20 @@
         <h2>1. Introduction</h2>
 
         <p>
-          Use the introduction to motivate the problem. What phenomenon are you trying to understand or
-          explain? Why does it matter in practice or in theory? Describe the gap in existing work in 1–3
-          short paragraphs.
+          Modern deep learning systems for language, vision, and even video are typically built by stacking many
+          Transformer layers, following the architecture introduced by Vaswani et al [1]. This design underlies large 
+          language models such as GPT-3, an autoregressive Transformer with 175 billion parameters, as reported in the 
+          original NeurIPS paper “Language Models are Few-Shot Learners.” Even “smaller” open models remain at 
+          multi-billion–parameter scale. For example, Mistral 7B is a 7-billion-parameter [2] Transformer, Llama 2 
+          provides models ranging from 7 billion to 70 billion parameters, and DeepSeek LLM includes variants up to 
+          67 billion parameters [3]. Training and serving such models require substantial computation and energy, with
+          empirical studies showing that state-of-the-art NLP and large neural networks incur significant financial 
+          cost and carbon emissions [4]. Because these multi-billion-parameter Transformers strain the memory, latency,
+          and power budgets of edge hardware, a large body of work now focuses on efficient Transformer variants,
+          model compression, and on-device inference to make deployment on resource-constrained devices more 
+          feasible [5].
         </p>
 
-        <p>
-          Example: Deep learning systems achieve striking performance on a wide range of tasks, yet
-          our theoretical understanding of why they work so well remains incomplete. Existing analyses
-          often focus on simplified models, narrow regimes, or isolated phenomena (e.g., optimization,
-          generalization, scaling laws), but we lack a unifying picture.
-        </p>
-
-        <p>
-          Then outline the structure of the post in a few sentences:
-          “In this post, we (1) introduce X, (2) connect it to Y and Z, and (3) illustrate its implications
-          for practice through a small experiment.”
-        </p>
       </section>
 
       <!-- Background -->
