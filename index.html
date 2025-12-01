@@ -446,7 +446,50 @@
           although its accuracy can degrade at extremely low bit-widths or under strong hardware constraints. 
         </p>
 
-        <h3>2.2 Low Rank Approximation (LoRA)</h3>
+        <h3>2.2 Low-Rank Approximation</h3>
+        <p>
+          Training pipelines of Modern LLMs include large-scale pretraining on general-domain data before undergoing 
+          adaptation to a particular task. However, recent models such as GPT, Gemini, and Claude use very large 
+          transformer architectures, often with tens or hundreds of billions of parameters, and even consumer or open 
+          models such as Mistral and LLaMA can have tens of billions of parameters. Thus, full fine-tuning (i.e., 
+          updating every single weight within the model) becomes extremely expensive and often impractical. 
+        </p>
+
+        <p>
+          To address this issue, researchers at Microsoft introduced LoRA (Low-Rank Adaptation of Large Language Models) 
+          [12]. LoRA adds a small trainable module that represents the weight update as the product of two low-rank
+           matrices, while the original model weights are kept frozen. The key assumption is that, for large 
+           overparameterized models, the weight update during fine-tuning lies in a much lower-dimensional subspace. 
+           Thus, the actual gradient update becomes the following:
+        </p>
+
+        <div style="position: relative; margin: 1em 0; font-family: 'Times New Roman', Times, serif; font-size: 1.5em;">
+          <p style="text-align: center; font-style: italic; margin: 0;">
+            h = W<sub>0</sub> + &Delta;W
+          </p>
+          <span style="position: absolute; right: 0; top: 0; font-style: normal;">
+            (1)
+          </span>
+        </div>
+
+        <p>
+          In particular, we set <i>&Delta;W</i> = <i>A</i><i>B</i>, where <i>A</i> &in;
+          &#8477;<sup><i>d</i><sub><i>out</i></sub> &times; <i>r</i></sup> and <i>B</i> &in; &#8477;<sup><i>r</i>
+          &times; <i>d</i><sub><i>in</i></sub></sup>. These LoRA layers are inserted across the model in every transformer 
+          block to approximate the necessary gradient updates for fine-tuning without having to update all of the 
+          original weights. The final updated matrix is <i>h</i> as per equation 1.
+        </p>
+
+        <p>
+          With the introduction of LoRA, it has inspired several follow-up methods such as QLoRA, which combines 
+          low-rank adaptation with low-precision quantization [13]. QLoRA further decreases the memory footprint and 
+          inference time by quantizing the base model weights to 4-bit precision while keeping a small set of LoRA 
+          adapter weights in higher precision (i.e. 16-bit floating point) for training. In this setup, the quantized 
+          base model stays fixed, and only the higher-precision LoRA parameters are updated, allowing the fine-tuned 
+          model to approach the performance of a standard 16-bit or 32-bit model while using much less memory during 
+          both training and inference.
+        </p>
+
       </section>
 
       <!-- Methods / Main Idea -->
