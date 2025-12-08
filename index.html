@@ -543,89 +543,228 @@
           Consequently, this low-rank assumption imposes an inherent limitation on the choice of <i>r</i>, 
           which must satisfy <i>r</i> &le; min(<i>d</i><sub>model</sub>, <i>d</i><sub>k</sub>). If <i>r</i> is greater than
           <i>d</i><sub>model</sub> or  <i>d</i><sub>k</sub>, then the model is overdetermined, and it will completely delete
-          the purpose of using FAP to reduce trainable parameters.
+          the purpose of using FAP to reduce trainable parameters. A snippet of the code is shown below:
         </p>
 
-        <h3 id="core-idea">3.2 Models</h3>
+        <pre><code>
+  ...
+
+  self.A = nn.Linear(in_features=in_features, out_features=rank, bias=False)
+  self.B = nn.Linear(in_features=rank, out_features=out_features, bias=bias)
+
+  # Initialize like LoRA (A random, B near-zero)
+  nn.init.kaiming_uniform_(self.A.weight, a=sqrt(5))
+  nn.init.zeros_(self.B.weight)
+
+  if bias and self.B.bias is not None:
+      nn.init.zeros_(self.B.bias)
+  
+  ...
+        </code></pre>
+
+
+        <h3 id="core-idea">4.2 Models</h3>
         <p>
           Due to resource constraints, we were not able to recreate a low-rank version of GPT-3 and
           instead opted to create a smaller causal language model. Additionally, we evaluated the
           effectiveness of low-rank projections not only on next-token prediction, but also on
           image classification by redefining Vision Transformers (ViT) using low-rank projections. 
+          For the causal language model, we used a small transformer model. The hyperparameters of the 
+          models are below:
         </p>
-        
+
+        <table
+          style="
+            border-collapse: collapse;
+            margin: 1em auto;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.95em;
+            min-width: 320px;
+            box-shadow: 0 0 4px rgba(0,0,0,0.2);
+          "
+        >
+          <caption style="caption-side: bottom; padding-top: 0.5em; font-style: italic;">
+            Table 1: Language Model Hyperparameters
+          </caption>
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th
+                style="
+                  border: 1px solid #000;
+                  padding: 6px 10px;
+                  text-align: left;
+                "
+              >
+                Hyperparameter
+              </th>
+              <th
+                style="
+                  border: 1px solid #000;
+                  padding: 6px 10px;
+                  text-align: center;
+                "
+              >
+                Value
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6px 10px;">Vocabulary Size</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">50257</td>
+            </tr>
+            <tr style="background-color: #fafafa;">
+              <td style="border: 1px solid #000; padding: 6px 10px;"># of layers</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">32</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6px 10px;"># of Attentions Per Layer </td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">64</td>
+            </tr>
+            <tr style="background-color: #fafafa;">
+              <td style="border: 1px solid #000; padding: 6px 10px;">Hidden size (<i>d</i><sub>model</sub>)</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">786</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6px 10px;">Feedforward size</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">3072</td>
+            </tr>
+            <tr style="background-color: #fafafa;">
+              <td style="border: 1px solid #000; padding: 6px 10px;">Max Positional Embedding</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">1024</td>
+            </tr>
+          </tbody>
+        </table>
+
         <p>
-          For the causal language model, we used 
+          The hyperparameters of the ViT are below:
         </p>
+
+
+                <table
+          style="
+            border-collapse: collapse;
+            margin: 1em auto;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.95em;
+            min-width: 320px;
+            box-shadow: 0 0 4px rgba(0,0,0,0.2);
+          "
+        >
+          <caption style="caption-side: bottom; padding-top: 0.5em; font-style: italic;">
+            Table 2: ViT Hyperparameters
+          </caption>
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th
+                style="
+                  border: 1px solid #000;
+                  padding: 6px 10px;
+                  text-align: left;
+                "
+              >
+                Hyperparameter
+              </th>
+              <th
+                style="
+                  border: 1px solid #000;
+                  padding: 6px 10px;
+                  text-align: center;
+                "
+              >
+                Value
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6px 10px;">In Channels</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">3</td>
+            </tr>
+            <tr style="background-color: #fafafa;">
+              <td style="border: 1px solid #000; padding: 6px 10px;">Out Channels</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">10</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6px 10px;">Image Size</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">32</td>
+            </tr>
+            <tr style="background-color: #fafafa;">
+              <td style="border: 1px solid #000; padding: 6px 10px;">Hidden size (<i>d</i><sub>model</sub>)</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">64</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6px 10px;">Feedforward size</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">128</td>
+            </tr>
+            <tr style="background-color: #fafafa;">
+              <td style="border: 1px solid #000; padding: 6px 10px;"># of Hidden Layers</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">6</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #000; padding: 6px 10px;"># of Attentions per Layer</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">3</td>
+            </tr>
+            <tr style="background-color: #fafafa;">
+              <td style="border: 1px solid #000; padding: 6px 10px;">Patch Size</td>
+              <td style="border: 1px solid #000; padding: 6px 10px; text-align: center;">4</td>
+            </tr>
+          </tbody>
+        </table>
+
+      In both models, the FFN modules use the Gaussian Error Linear Unit (GeLU) activation. We also employ
+      RMSNorm to improve training stability. In the ViT, we use learned patch embeddings with a fixed 
+      patch size, primarily to demonstrate the proof of concept for our approach, though Rotary Position 
+      Embeddings (RoPE) could be incorporated into both models.
+
+      <h3 id="core-idea">4.2 Training Setup</h3>
+      <p>
+        For both models, we trained with a batch size of 16, a learning rate of 
+        5 &times; 10<sup>&minus;4</sup>, and a weight decay of 0.01. Training was run for 3 epochs with 
+        1000 warmup steps and a maximum gradient norm of 1.0 for gradient clipping. We also performed 
+        periodic checkpointing and evaluation, saving the model every 1000 steps and evaluating every 500 steps.
+      </p>
+
+      <h3 id="core-idea">4.3 Dataset</h3>
+      <p>
+        We used the TinyStories dataset for training the causal language model, primarily due to resource constraints,
+        and evaluated the ViT on the CIFAR-10 dataset.
+      </p>
 
       </section>
 
       <!-- Experiments -->
       <section id="experiments">
-        <h2>4. Experiments</h2>
+        <h2>5. Evaluation</h2>
 
-        <h3 id="experimental-setup">4.1 Experimental setup</h3>
-        <p>
-          Describe the dataset, models, and training setup. Keep it short and link to a repo if you have one.
-        </p>
+        <h3 id="experimental-setup">5.2 Causal Language Model Evaluation Metrics</h3>
+          <p>
+            Our primary quantitative metric for the causal language model is next-token prediction performance on the TinyStories dataset,
+            evaluated in terms of perplexity. Our objective is to minimize the perplexity of the model. In addition, we perform a qualitative
+            evaluation by prompting the model and comparing its generations to those of a full-rank baseline model without any low-rank
+            approximation.
+          </p>
 
-        <ul>
-          <li><strong>Datasets:</strong> e.g., CIFAR-10, synthetic Gaussian mixtures, toy regression.</li>
-          <li><strong>Models:</strong> e.g., 3-layer MLP, small transformer, CNN baseline.</li>
-          <li><strong>Training:</strong> optimizer, learning rate, number of steps, key hyperparameters.</li>
-        </ul>
+        <h3 id="results">5.3 ViT Evaluation Metrics</h3>
+          <p>
+            For evaluating our ViT, we trained on the CIFAR-10 dataset and measured performance using standard top-1
+            classification accuracy on a held-out validation set. We compared low-rank variants against a full-rank
+            baseline model trained with identical hyperparameters to isolate the effect of the low-rank approximation.
+            In addition, we inspected the attention maps across layers and heads to visualize how the attention patterns
+            change under low-rank factorization and to verify that the model still focuses on semantically meaningful
+            regions of the input images.
+          </p>
 
-        <h3 id="results">4.2 Results</h3>
-
-        <figure>
-          <img src="images/example-plot.png" alt="Placeholder plot for experimental results" />
-          <figcaption>
-            Figure 1: Placeholder description of your main quantitative result. Replace with your own plot.
-          </figcaption>
-        </figure>
-
-        <p>
-          Interpret the figure in words. What’s the pattern? Which comparisons matter? What should
-          the reader take away that they wouldn’t get from just glancing at the plot?
-        </p>
-
-        <h3 id="qualitative">4.3 Qualitative examples (optional)</h3>
-        <p>
-          If relevant, show a few qualitative examples (e.g., model behaviors, attention patterns,
-          visualization of representations). Explain why each example is interesting, not just that it exists.
-        </p>
       </section>
 
       <!-- Discussion -->
       <section id="discussion">
-        <h2>5. Discussion</h2>
+        <h2>6. Results</h2>
 
-        <h3 id="implications">5.1 Implications</h3>
-        <p>
-          Summarize what your perspective or results imply for practice or theory. Think:
-          “If this view is right, how should we train, evaluate, or think about models differently?”
-        </p>
-
-        <h3 id="limitations">5.2 Limitations</h3>
-        <p>
-          Be explicit about scope. Where does your story clearly not apply? Which assumptions are
-          unrealistic? What would make you update or abandon this perspective?
-        </p>
-
-        <h3 id="future-work">5.3 Open questions / future work</h3>
-        <p>
-          End with 2–4 concrete directions a reader could explore:
-        </p>
-        <ul>
-          <li>Extend the framework to larger or more realistic models.</li>
-          <li>Test specific predictions on new benchmarks.</li>
-          <li>Connect this view to other theories (e.g., NTK, grokking, scaling laws).</li>
-        </ul>
       </section>
 
-      <!-- Conclusion -->
-      <section id="conclusion">
-        <h2>6. Conclusion</h2>
+      <section id="limitation">
+        <h2>7. Discussion </h2>
         <p>
           Write a short, non-technical recap in 2–3 paragraphs. Reiterate the main question, your key
           ideas, and your most important takeaway. Assume the reader skimmed everything else.
@@ -635,13 +774,22 @@
       <!-- References -->
       <section id="references">
         <h2>References</h2>
-        <p style="font-size: 14px; color: var(--text-muted);">
-          Use whatever citation style you like; for a blog, hyperlinks are usually enough.
+        <p style="font-size: 24px; color: var(--text-muted);">
         </p>
-        <ul>
-          <li>[1] Author et al. <em>Title of a related paper</em>, Conference, Year. <a href="#">link</a></li>
-          <li>[2] Another Author. <em>Another reference</em>. <a href="#">link</a></li>
-          <li>[3] Blog post: <em>Good prior writeup on a similar topic</em>. <a href="#">link</a></li>
+        <ul style="list-style-type: none; padding-left: 0; margin-left: 0.5em;">
+          <li>1. Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, L., &amp; Polosukhin, I. (2023). Attention Is All You Need. <a href="https://arxiv.org/abs/1706.03762">https://arxiv.org/abs/1706.03762</a></li>
+          <li>2. Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., Neelakantan, A., Shyam, P., Sastry, G., Askell, A., Agarwal, S., Herbert-Voss, A., Krueger, G., Henighan, T., Child, R., Ramesh, A., Ziegler, D. M., Wu, J., Winter, C., … Amodei, D. (2020). Language Models are Few-Shot Learners. <a href="https://arxiv.org/abs/2005.14165">https://arxiv.org/abs/2005.14165</a></li>
+          <li>3. Jiang, A. Q., Sablayrolles, A., Mensch, A., Bamford, C., Chaplot, D. S., de las Casas, D., Bressand, F., Lengyel, G., Lample, G., Saulnier, L., Lavaud, L. R., Lachaux, M.-A., Stock, P., Scao, T. L., Lavril, T., Wang, T., Lacroix, T., &amp; Sayed, W. E. (2023). Mistral 7B. <a href="https://arxiv.org/abs/2310.06825">https://arxiv.org/abs/2310.06825</a></li>
+          <li>4. Strubell, E., Ganesh, A., &amp; McCallum, A. (2019). Energy and Policy Considerations for Deep Learning in NLP. <a href="https://arxiv.org/abs/1906.02243">https://arxiv.org/abs/1906.02243</a></li>
+          <li>5. Tay, Y., Dehghani, M., Bahri, D., &amp; Metzler, D. (2022). Efficient Transformers: A Survey. ACM Comput. Surv., 55(6). <a href="https://doi.org/10.1145/3530811">https://doi.org/10.1145/3530811</a></li>
+          <li>6. Zhang, J., Xiang, C., Huang, H., Wei, J., Xi, H., Zhu, J., &amp; Chen, J. (2025). SpargeAttention: Accurate and Training-free Sparse Attention Accelerating Any Model Inference. <a href="https://arxiv.org/abs/2502.18137">https://arxiv.org/abs/2502.18137</a></li>
+          <li>7. Zhu, X., Li, J., Liu, Y., Ma, C., &amp; Wang, W. (2024). A Survey on Model Compression for Large Language Models. <a href="https://arxiv.org/abs/2308.07633">https://arxiv.org/abs/2308.07633</a></li>
+          <li>8. Liu, Z., Oguz, B., Zhao, C., Chang, E., Stock, P., Mehdad, Y., Shi, Y., Krishnamoorthi, R., &amp; Chandra, V. (2023). LLM-QAT: Data-Free Quantization Aware Training for Large Language Models. <a href="https://arxiv.org/abs/2305.17888">https://arxiv.org/abs/2305.17888</a></li>
+          <li>9. Yao, Z., Aminabadi, R. Y., Zhang, M., Wu, X., Li, C., &amp; He, Y. (2022). ZeroQuant: Efficient and Affordable Post-Training Quantization for Large-Scale Transformers. <a href="https://arxiv.org/abs/2206.01861">https://arxiv.org/abs/2206.01861</a></li>
+          <li>10. Frantar, E., Ashkboos, S., Hoefler, T., &amp; Alistarh, D. (2023). GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers. <a href="https://arxiv.org/abs/2210.17323">https://arxiv.org/abs/2210.17323</a></li>
+          <li>11. Xiao, G., Lin, J., Seznec, M., Wu, H., Demouth, J., &amp; Han, S. (2024). SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models. <a href="https://arxiv.org/abs/2211.10438">https://arxiv.org/abs/2211.10438</a></li>
+          <li>12. Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., &amp; Chen, W. (2021). LoRA: Low-Rank Adaptation of Large Language Models. <a href="https://arxiv.org/abs/2106.09685">https://arxiv.org/abs/2106.09685</a></li>
+          <li>13. Dettmers, T., Pagnoni, A., Holtzman, A., &amp; Zettlemoyer, L. (2023). QLoRA: Efficient Finetuning of Quantized LLMs. <a href="https://arxiv.org/abs/2305.14313">https://arxiv.org/abs/2305.14313</a></li>
         </ul>
       </section>
     </article>
