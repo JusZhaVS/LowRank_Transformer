@@ -340,13 +340,13 @@
   <main>
     <!-- Main article -->
     <article class="article-card">
-      <div class="article-meta">Final · Last updated: 2025-11-27</div>
+      <div class="article-meta">Final · Last updated: 2025-12-09</div>
       <h1 class="article-title">Factored Attention Projections (FAP) for Parameter-Efficient Transformers</h1>
 
       <div class="article-authors">
-        <a href="https://github.com/HatedFate">Xin Qi Liu</a>,
-        <a href="https://pornhub.com">Justin Zhang</a>,
-        <a href="https://pornhub.com">Nico</a>
+        <a href="https://github.com/HatedFate">Xin Qi Liu<sup>†</sup></a>,
+        <a>Justin Zhang</a>,
+        <a>Nico</a>
       </div>
       <hr />
 
@@ -420,7 +420,7 @@
       <section id="Background">
         <h2> 3. Background </h2>
 
-        <h3>3.1 Quanitzation</h3>
+        <h3 id="quantization">3.1 Quantization</h3>
         <p>
           Quantization has become one of the most widely used methods for model compression because 
           it can substantially reduce memory and compute while often preserving model quality. Many practical 
@@ -447,7 +447,7 @@
           although its accuracy can degrade at extremely low bit-widths or under strong hardware constraints. 
         </p>
 
-        <h3>3.2 Low-Rank Approximation</h3>
+        <h3 id="low-ranks">3.2 Low-Rank Approximation</h3>
         <p>
           Training pipelines of Modern LLMs include large-scale pretraining on general-domain data before undergoing 
           adaptation to a particular task. However, recent models such as GPT, Gemini, and Claude use very large 
@@ -504,7 +504,7 @@
           factorizations.
         </p>
 
-        <h3>4.1 Low-Rank Projections</h3>
+        <h3 id="low-projections">4.1 Low-Rank Projections</h3>
 
         <p>
           In standard transformers, the queries, keys, and values projection are defined as follows:
@@ -529,8 +529,8 @@
 
         <div>
           <p style="text-align: center; font-style: italic; margin: 1.0em 1; font-size: 1.5em;">
-            W<sub>Q</sub> = A<sub>Q</sub>B<sub>Q</sub>,&nbsp;
-            W<sub>K</sub> = A<sub>K</sub>B<sub>K</sub>,&nbsp;
+            W<sub>Q</sub> = A<sub>Q</sub>B<sub>Q</sub> <br>
+            W<sub>K</sub> = A<sub>K</sub>B<sub>K</sub> <br>
             W<sub>V</sub> = A<sub>V</sub>B<sub>V</sub>
           </p>
             <span style="position: absolute; right: 0; top: 0; font-style: normal;">
@@ -546,7 +546,7 @@
           the purpose of using FAP to reduce trainable parameters. A snippet of the code is shown below:
         </p>
 
-        <pre><code>
+<pre><code>
   ...
 
   self.A = nn.Linear(in_features=in_features, out_features=rank, bias=False)
@@ -560,10 +560,44 @@
       nn.init.zeros_(self.B.bias)
   
   ...
-        </code></pre>
+</code></pre>
+
+        <p>
+          To see the parameter reduction explicitly, note that a standard projection matrix 
+          <i>W</i> &in; &#8477;<sup><i>d</i><sub>model</sub>&times;<i>d</i><sub><i>k</i></sub></sup> contains
+        </p>
+
+        <p style="text-align: center; margin: 0.5em 0; font-size: 1.5em;">
+          <i>W</i><sub>full</sub> = <i>d</i><sub>model</sub> &times; <i>d</i><sub><i>k</i></sub>
+        </p>
+
+        <p>
+          parameters. Under the low-rank factorization <i>W</i> = <i>A</i><i>B</i>, the total number of parameters becomes
+        </p>
+
+        <p style="text-align: center; margin: 0.5em 0; font-size: 1.5em;">
+          <i>W</i><sub>low-rank</sub> = <i>d</i><sub>model</sub> &times; <i>r + r </i>&times; <i>d<sub>k</sub> = r </i>(<i>d</i><sub>model</sub> + <i>d</i><sub><i>k</i></sub>).
+        </p>
+
+        <p>
+          Thus, the number of parameters saved is
+        </p>
+
+        <p style="text-align: center; margin: 0.5em 0; font-size: 1.5em;">
+          <i>W</i><sub>full</sub> &minus; <i>W</i><sub>low-rank</sub> =
+          <i>d</i><sub>model</sub> <i>d</i><sub>k</sub> &minus;
+          <i>r</i> (<i>d</i><sub>model</sub> + <i>d</i><sub>k</sub>).
+        </p>
 
 
-        <h3 id="core-idea">4.2 Models</h3>
+        <p>
+          In the common case where <i>d</i><sub>model</sub> &approx; <i><sub>k</sub> = d</i> and <i>r</i> &laquo; <i>d</i>, 
+          the full matrix scales as &Theta;(<i>d</i><sup>2</sup>), whereas the low-rank factorization scales as &Theta;(<i>rd</i>), 
+          effectively reducing a quadratic parameter growth to (approximately) linear in the model dimension.
+        </p>
+
+
+        <h3 id="models">4.2 Models</h3>
         <p>
           Due to resource constraints, we were not able to recreate a low-rank version of GPT-3 and
           instead opted to create a smaller causal language model. Additionally, we evaluated the
@@ -715,7 +749,8 @@
       In both models, the FFN modules use the Gaussian Error Linear Unit (GeLU) activation. We also employ
       RMSNorm to improve training stability. In the ViT, we use learned patch embeddings with a fixed 
       patch size, primarily to demonstrate the proof of concept for our approach, though Rotary Position 
-      Embeddings (RoPE) could be incorporated into both models.
+      Embeddings (RoPE) could be incorporated into both models. Lastly, the temperature when prompting
+      the causual language is 0.7.
 
       <h3 id="core-idea">4.2 Training Setup</h3>
       <p>
@@ -737,7 +772,13 @@
       <section id="experiments">
         <h2>5. Evaluation</h2>
 
-        <h3 id="experimental-setup">5.2 Causal Language Model Evaluation Metrics</h3>
+        <p>
+          For all evaluations, we use the following ranks: 4, 8, 16, 20, 32, and 40. This range covers a 
+          meaningful portion of the rank spectrum and allows us to analyze both where the low-rank model 
+          begins to deteriorate and where it remains relatively stable compared to the baseline full-rank model.
+        </p>
+
+        <h3 id="casual-eval">5.2 Causal Language Model Evaluation Metrics</h3>
           <p>
             Our primary quantitative metric for the causal language model is next-token prediction performance on the TinyStories dataset,
             evaluated in terms of perplexity. Our objective is to minimize the perplexity of the model. In addition, we perform a qualitative
@@ -745,7 +786,7 @@
             approximation.
           </p>
 
-        <h3 id="results">5.3 ViT Evaluation Metrics</h3>
+        <h3 id="vit-eval">5.3 ViT Evaluation Metrics</h3>
           <p>
             For evaluating our ViT, we trained on the CIFAR-10 dataset and measured performance using standard top-1
             classification accuracy on a held-out validation set. We compared low-rank variants against a full-rank
@@ -757,17 +798,99 @@
 
       </section>
 
-      <!-- Discussion -->
-      <section id="discussion">
+      <!-- Results -->
+      <section id="Results">
         <h2>6. Results</h2>
+        <h3>6.1 Perplexity Analysis</h3>
+        <div style="text-align: center; margin: 1em 0;">
+          <img src="results/perplexity-anal.png"
+              alt="Perplexity analysis for LowRank Transformer"
+              style="max-width: 100%; height: auto;">
+        </div>
+
+        <p>
+          The perplexity of the language model remains relatively stable for ranks greater than 8, 
+          but increases significantly when the rank is reduced to 4. 
+        </p>
+
+        <h3>6.4 Classification Accuracy</h3>
+
+        <h3>6.5 Counting Trainable Parameters</h3>
+        <div style="text-align: center; margin: 1em 0;">
+          <img src="results/parameters-anal.png"
+              alt="Perplexity analysis for LowRank Transformer"
+              style="max-width: 100%; height: auto;">
+        </div>
+
+        <p>
+          As predicted by the asymptotic analysis of parameter savings, the 
+          number of parameters varies linearly with the rank.
+        </p>
 
       </section>
 
-      <section id="limitation">
+      <section id="Discussion">
         <h2>7. Discussion </h2>
         <p>
-          Write a short, non-technical recap in 2–3 paragraphs. Reiterate the main question, your key
-          ideas, and your most important takeaway. Assume the reader skimmed everything else.
+          The results from applying our low-rank projection to the transformer suggest that an effective model 
+          can indeed exist in a low-rank subspace. In other words, our experiments show that, with a sufficiently 
+          large rank, low-rank approximations can achieve performance comparable to a full-rank model. Overall, ranks
+           between 8 and 40 appear sufficient both to fit the training data and to generalize well to the broader data
+          distribution.
+        </p>
+
+        <p>
+          From the causal language model perspective, we observe that perplexity increases dramatically at extremely 
+          low ranks such as 4, but for ranks above 8 it remains within roughly 2% of the baseline. This sharp degradation 
+          at very small ranks is likely due to reduced attention diversity caused by the low rank approximation, which 
+          limits the model’s ability to attend to relevant tokens (visualization of the attention in ViT would explain 
+          this effect). Qualitatively, models with ranks between 8 and 40 produce outputs with expressiveness comparable
+          to the full rank model. However, across all configurations, including the baseline, the model fails to answer 
+          questions outside its training distribution. This limitation is primarily due to the small model size and the  
+          restricted training data, rather than the use of low rank projections.
+        </p>
+
+        <p>
+          For the ViT, we also observe very similar results for ranks between 8 and 40, achieving validation accuracy
+          within 2% to 5% of the baseline. The effect of the low rank approximation on the attention mechanism is clear 
+          in the visualizations: the attention becomes more dispersed and less sharply focused than in the baseline model. 
+          Despite this, the model still reaches comparable accuracy, possibly because the essential global structure of the
+          images is preserved in a lower dimensional subspace, allowing the network to rely on coarse but still informative
+          patterns rather than very sharp attention peaks.
+        </p>
+      
+        <h3>7.1 Is this worth it?</h3>
+
+        <p>
+          Whether this method is worthwhile to use in modern transformer based models depends strongly on the deployment
+          setting. Large models such as ChatGPT, Gemini, and Claude are typically served on powerful infrastructure with 
+          ample memory and compute, where there is less pressure to rely on bottleneck techniques like pruning, quantization,
+          or low rank approximation of projections. In contrast, our approach is most relevant for resource constrained 
+          environments such as laptops, mobile devices, and other on-device inference settings, where even modest savings 
+          in parameters and memory can be critical. In short, our FAP method is geared toward on-device inference, enabling
+          models to use less space and compute as they continue to grow in size and complexity. Even so, approximating 
+          the projection matrices alone will save about 10 - 15% of the total model size. For example, in the case of our
+          causal language model, rank 8 reduces the amount of parameters by about 100 million, which is equivalent to 
+          about 180 MB, whereas the full model is 1.2 GB.
+        </p>
+      </section>
+
+      <section id="Limitations">
+        <h2>8. Limitations</h2>
+        <p>
+          While our method does save a respectable number of parameters, it does not necessarily result in a faster model.
+          Many hardware efficient transformer algorithms, such as Flash Attention [14] and Xformers [15], are optimized for 
+          dense rectangular projection matrices, so reducing the parameter count via low rank approximation does not automatically 
+          translate into lower inference latency on such systems. Thus, in this work, we do not focus on the Floating-Point 
+          Operations Per Second (FLOPs) as part of our analysis since this is a completely different axis optimization, and 
+          it is not a great one at that either largely because it is hardware dependent.
+        </p>
+        <p>
+          Another limitation of our study is that we evaluate the architecture on relatively easy tasks, primarily due 
+          to resource constraints. A more thorough analysis would require harder benchmarks, such as datasets that depend
+          strongly on long range context (for example, some IMO or IOI style problems) or more challenging vision tasks
+          like ImageNet scale classification or image generation. Such experiments are needed to more convincingly 
+          demonstrate that low rank approximations can be applied reliably to tougher, real world workloads.
         </p>
       </section>
 
@@ -790,44 +913,51 @@
           <li>11. Xiao, G., Lin, J., Seznec, M., Wu, H., Demouth, J., &amp; Han, S. (2024). SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models. <a href="https://arxiv.org/abs/2211.10438">https://arxiv.org/abs/2211.10438</a></li>
           <li>12. Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., &amp; Chen, W. (2021). LoRA: Low-Rank Adaptation of Large Language Models. <a href="https://arxiv.org/abs/2106.09685">https://arxiv.org/abs/2106.09685</a></li>
           <li>13. Dettmers, T., Pagnoni, A., Holtzman, A., &amp; Zettlemoyer, L. (2023). QLoRA: Efficient Finetuning of Quantized LLMs. <a href="https://arxiv.org/abs/2305.14313">https://arxiv.org/abs/2305.14313</a></li>
+          <li>14. Dao, T., Fu, D. Y., Ermon, S., Rudra, A., & Ré, C. (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. <a href="https://arxiv.org/abs/2205.14135">https://arxiv.org/abs/2205.14135</a></li>
+          <li>15. Lefaudeux, B., Massa, F., Liskovich, D., Xiong, W., Caggiano, V., Naren, S., Xu, M., Hu, J., Tintore, M., Zhang, S., Labatut, P., Haziza, D., Wehrstedt, L., Reizenstein, J., & Sizov, G. (2022). xFormers: A modular and hackable Transformer modelling library. <a href="https://github.com/facebookresearch/xformers">https://github.com/facebookresearch/xformers</a></li>
         </ul>
       </section>
     </article>
 
     <!-- Sidebar / TOC -->
-    <aside>
-      <nav class="toc">
-        <div class="toc-title">On this page</div>
-        <small>Jump to any section</small>
-        <ul>
-          <li><a href="#abstract">Abstract</a></li>
-          <li><a href="#introduction">1. Introduction</a></li>
-          <li><a href="#Related-Works">2. Related Works</a>
-            <ul class="toc-sub">
-              <li><a href="#Quantization">2.1 Quantization</a></li>
-              <li><a href="#Low-Rank-Approximation">2.2 Low Rank Approximation (LoRA)</a></li>
-            </ul>
-          </li>
-          <li><a href="#methods">3. Main Idea / Framework</a>
-            <ul class="toc-sub">
-              <li><a href="#setup">3.1 Setup</a></li>
-              <li><a href="#core-idea">3.2 Core idea</a></li>
-              <li><a href="#theory">3.3 Theory</a></li>
-            </ul>
-          </li>
-          <li><a href="#experiments">4. Experiments</a>
-            <ul class="toc-sub">
-              <li><a href="#experimental-setup">4.1 Setup</a></li>
-              <li><a href="#results">4.2 Results</a></li>
-              <li><a href="#qualitative">4.3 Qualitative</a></li>
-            </ul>
-          </li>
-          <li><a href="#discussion">5. Discussion</a></li>
-          <li><a href="#conclusion">6. Conclusion</a></li>
-          <li><a href="#references">References</a></li>
+<!-- Sidebar / TOC -->
+<aside>
+  <nav class="toc">
+    <div class="toc-title">On this page</div>
+    <small>Jump to any section</small>
+    <ul>
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#introduction">1. Introduction</a></li>
+      <li><a href="#motivation">2. Motivation</a></li>
+
+      <li><a href="#Background">3. Background</a></li>
+
+        <ul class="toc-sub">
+          <li><a href="#quantization">3.1 Quantization</a></li>
+          <li><a href="#low-ranks">3.2 Low-Rank Approximation</a></li>
         </ul>
-      </nav>
-    </aside>
+
+      <li><a href="#methods">4. Methodology</a></li>
+        <ul class="toc-sub">
+          <li><a href="#low-projections">4.1 Low-Rank Projections</a></li>
+          <li><a href="#models">4.2 Models</a></li>
+        </ul>
+      <li>
+        <a href="#experiments">5. Evaluation</a>
+        <ul class="toc-sub">
+          <li><a href="#casual-eval">5.2 Causal LM Evaluation Metrics</a></li>
+          <li><a href="#vit-eval">5.3 ViT Evaluation Metrics</a></li>
+        </ul>
+      </li>
+
+      <li><a href="#Results">6. Results</a></li>
+      <li><a href="#Discussion">7. Discussion</a></li>
+      <li><a href="#Limitations">8. Limitations</a></li>
+      <li><a href="#references">References</a></li>
+    </ul>
+  </nav>
+</aside>
+
   </main>
 
   <footer>
