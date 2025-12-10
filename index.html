@@ -346,7 +346,7 @@
       <div class="article-authors">
         <a href="https://github.com/HatedFate">Xin Qi Liu<sup>†</sup></a>,
         <a>Justin Zhang</a>,
-        <a>Nico</a>
+        <a>Nico Mangiafico</a>
       </div>
       <hr />
 
@@ -803,30 +803,61 @@
       <section id="Results">
         <h2>6. Results</h2>
         <h3>6.1 Perplexity Analysis</h3>
+
+          <p>
+          In this subsection, we present our perplexity analysis results. The graph below shows the perplexity of the language model on the y-axis and the corresponding rank on the x-axis for the ranks of 4, 8, 16, 20, 32, 40, and 64 (the baseline). As one can observe, the perplexity of the language model remains relatively stable for ranks greater than 8, but increases significantly when the rank is reduced to 4, going from a perplexity of 12.19 at a rank of 8 to a rank of 22.92 at rank 4. 
+        </p>
+
         <div style="text-align: center; margin: 1em 0;">
           <img src="results/perplexity-anal.png"
               alt="Perplexity analysis for LowRank Transformer"
               style="max-width: 100%; height: auto;">
         </div>
 
-        <p>
-          The perplexity of the language model remains relatively stable for ranks greater than 8, 
-          but increases significantly when the rank is reduced to 4. 
+
+
+        <h3>6.2 Counting Trainable Parameters</h3>
+
+
+          <p>
+          In this subsection, we present our analysis on the countable training parameters corresponding to rank. The graph below shows that, as predicted by the asymptotic analysis of parameter savings, the
+          number of parameters varies linearly with the rank. We do not explicitly include the coordinates on the graph above to avoid the visual being too cluttered, but the orange points on the line represent the countabel training parameters for the ranks of 4, 8, 16, 20, 32, 40, and 64 (the baseline). 
         </p>
 
-        <h3>6.4 Classification Accuracy</h3>
-
-        <h3>6.5 Counting Trainable Parameters</h3>
         <div style="text-align: center; margin: 1em 0;">
           <img src="results/parameters-anal.png"
               alt="Perplexity analysis for LowRank Transformer"
               style="max-width: 100%; height: auto;">
         </div>
 
+
+
+
+        <h3>6.3 Classification Accuracy</h3>
+
         <p>
-          As predicted by the asymptotic analysis of parameter savings, the 
-          number of parameters varies linearly with the rank.
+          In this subsection, we present our analysis on the ViT. The graph below demonstrates the relationship between ViT rank and the validation accuracy of the model. As one can observe, even as rank decreases down from the baseline of 64 to 4, there is only a small decrease in accuracy of under 4 percetange points. This suggests the potential that our approach could have to reduce model size by a decent margin without sacrificing much in performance and accuracy.
+
         </p>
+
+        <div style="text-align: center; margin: 1em 0;">
+          <img src="results/ViTAccuracy.png"
+              alt="ViT Rank vs Validation Accuracy"
+              style="max-width: 100%; height: auto;">
+        </div>
+
+        <p>
+          In addition to our validation accuracy results above, we also show our attention maps below for the ViT models of rank 4, 16, 32, and 64 (baseline) from top to bottom. As one can observe, the lowered rank does cause less sharp attention maps, as expected. We elaborate more on the implications of these results in our following Discussion section below. 
+
+        </p>
+
+        <h4>Attention Maps</h4>
+        <figure style="text-align: center; margin: 1em 0;">
+          <img src="results/all_heatmaps.png"
+              alt="Attention Maps for ViT"
+              style="max-width: 100%; height: auto;">
+          <figcaption>Attention Maps for ViT of Ranks 4, 16, 32, 64 (baseline), from top to bottom</figcaption>
+        </figure>
 
       </section>
 
@@ -860,7 +891,7 @@
           patterns rather than very sharp attention peaks.
         </p>
       
-        <h3>7.1 Is this worth it?</h3>
+        <h3>7.1 Is this worth it? A Discussion on Practicial Implicaitons of Our Work </h3>
 
         <p>
           Whether this method is worthwhile to use in modern transformer based models depends strongly on the deployment
@@ -872,7 +903,7 @@
           models to use less space and compute as they continue to grow in size and complexity. Even so, approximating 
           the projection matrices alone will save about 10 - 15% of the total model size. For example, in the case of our
           causal language model, rank 8 reduces the amount of parameters by about 100 million, which is equivalent to 
-          about 180 MB, whereas the full model is 1.2 GB.
+          about 180 MB, whereas the full model is 1.2 GB. Hence, the approach we have developed can be very valulabe in situations where smaller models are desired without incurring large decrements in performance.
         </p>
       </section>
 
